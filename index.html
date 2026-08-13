@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <link rel="preload" href="/logo.png" as="image" type="image/png" />
+    <link rel="preload" href="/favicon.png" as="image" type="image/png" />
+    <title>SUREST PLUG - Premier Website Marketplace</title>
+    <style>
+      @keyframes logoSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      .initial-logo-spin {
+        animation: logoSpin 1.2s linear infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background-color: #f8fafc; font-family: system-ui, -apple-system, sans-serif;">
+        <div style="text-align: center;">
+          <img src="/logo.png" alt="SUREST PLUG" style="width: 52px; height: 52px; margin: 0 auto 12px; display: block; object-fit: contain;" class="initial-logo-spin" onError="this.style.display='none'; document.getElementById('initial-fallback-icon').style.display='flex';" />
+          <div id="initial-fallback-icon" style="display: none; width: 52px; height: 52px; margin: 0 auto 12px; background-color: #2563eb; color: #ffffff; border-radius: 12px; align-items: center; justify-content: center; font-weight: 800; font-size: 20px;" class="initial-logo-spin">
+            SP
+          </div>
+          <p style="font-size: 14px; font-weight: 700; color: #334155; margin: 0;">Connecting to SUREST PLUG...</p>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

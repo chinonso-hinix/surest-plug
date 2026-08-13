@@ -1,0 +1,6 @@
+{
+  "name": "SUREST PLUG",
+  "description": "Website & Digital Product Marketplace for browsing, purchasing, and managing ready-to-launch websites.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
