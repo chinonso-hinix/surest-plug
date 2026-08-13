@@ -5,6 +5,6 @@
   "storageBucket": "surest-plug.firebasestorage.app",
   "messagingSenderId": "825801937021",
   "appId": "1:825801937021:web:f930bd589f24dc2a5b2114",
-  "measurementId": "G-ZYHDF1NKV1"
+  "measurementId": "G-ZYHDF1NKV1",
+  "firestoreDatabaseId": "ai-studio-surestplug-9025e12a-5e30-46c2-b002-50c483353e6e"
 }
-

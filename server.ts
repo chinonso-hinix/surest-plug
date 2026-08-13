@@ -27,28 +27,7 @@ async function authenticateToken(req: AuthRequest, res: Response, next: NextFunc
   }
 
   try {
-    let decodedToken: any = null;
-    try {
-      decodedToken = await adminAuth.verifyIdToken(token);
-    } catch (verifyErr) {
-      // Fallback: decode JWT payload if adminAuth.verifyIdToken fails
-      const parts = token.split('.');
-      if (parts.length === 3) {
-        const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
-        if (payload && (payload.uid || payload.user_id || payload.sub)) {
-          decodedToken = {
-            uid: payload.uid || payload.user_id || payload.sub,
-            email: payload.email || '',
-            admin: payload.admin === true
-          };
-        }
-      }
-    }
-
-    if (!decodedToken || !decodedToken.uid) {
-      res.status(403).json({ error: 'Invalid or expired authentication session' });
-      return;
-    }
+    const decodedToken = await adminAuth.verifyIdToken(token);
 
     const userDoc = db.getUserById(decodedToken.uid);
     const userEmail = (decodedToken.email || userDoc?.email || '').trim().toLowerCase();
@@ -697,32 +676,37 @@ app.post('/api/admin/broadcast', requireAdmin, (req: AuthRequest, res: Response)
 // --- BOOTSTRAP FIREBASE ACCOUNTS ---
 async function bootstrapFirebaseAccounts() {
   try {
-    // 1. Admin account
-    let adminRecord;
-    try {
-      adminRecord = await adminAuth.getUserByEmail('admin@surestplug.com');
-    } catch (e) {
-      adminRecord = await adminAuth.createUser({
-        email: 'admin@surestplug.com',
-        password: process.env.ADMIN_BOOTSTRAP_PASSWORD!,
-        displayName: 'Super Admin'
-      });
-    }
+    // 1. Existing authorized administrator account
+    const adminRecord = await adminAuth.getUserByEmail('chinonsochinix@gmail.com');
 
     await adminAuth.setCustomUserClaims(adminRecord.uid, { admin: true });
-    await adminDb.collection('users').doc(adminRecord.uid).set({
-      uid: adminRecord.uid,
-      fullName: 'Super Admin',
-      name: 'Super Admin',
-      email: 'admin@surestplug.com',
-      phone: '08141853557',
-      role: 'admin',
-      status: 'active',
-      balance: 1000,
-      profileImage: '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }, { merge: true });
+
+    const adminRef = adminDb.collection('users').doc(adminRecord.uid);
+    const adminDoc = await adminRef.get();
+
+    if (!adminDoc.exists) {
+      await adminRef.set({
+        uid: adminRecord.uid,
+        fullName: adminRecord.displayName || 'Super Admin',
+        name: adminRecord.displayName || 'Super Admin',
+        email: 'chinonsochinix@gmail.com',
+        phone: '',
+        role: 'admin',
+        status: 'active',
+        balance: 1000,
+        profileImage: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+    } else {
+      await adminRef.set({
+        uid: adminRecord.uid,
+        email: 'chinonsochinix@gmail.com',
+        role: 'admin',
+        status: 'active',
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    }
 
     // 2. Demo User account
     let userRecord;
@@ -741,7 +725,7 @@ async function bootstrapFirebaseAccounts() {
       fullName: 'Demo Buyer',
       name: 'Demo Buyer',
       email: 'user@surestplug.com',
-      phone: '08141853557',
+      phone: '',
       role: 'user',
       status: 'active',
       balance: 250,
