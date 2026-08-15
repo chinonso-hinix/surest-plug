@@ -14,6 +14,8 @@ import {
 } from '../types';
 import { getIdToken } from '../lib/firebase';
 
+const API_BASE_URL = 'https://surest-plug.ai.studio';
+
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = await getIdToken();
   const headers: Record<string, string> = {
@@ -25,7 +27,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(endpoint, {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers
   });
@@ -59,7 +61,7 @@ export const api = {
   getPurchaseDelivery: (websiteId: string) => request<{ website: Website; delivery: WebsiteDelivery }>(`/api/user/purchases/${websiteId}/delivery`),
   downloadWebsite: async (websiteId: string) => {
     const token = await getIdToken();
-    const res = await fetch(`/api/user/purchases/${websiteId}/download`, {
+    const res = await fetch(`${API_BASE_URL}/api/user/purchases/${websiteId}/download`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (!res.ok) {

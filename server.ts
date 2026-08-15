@@ -6,6 +6,33 @@ import { db, adminAuth, adminDb } from './src/server/db.js';
 
 const PORT = Number(process.env.PORT) || 3000;
 const app = express();
+
+// CORS: allow the production frontend to call the API
+app.use((req, res, next) => {
+  const allowedOrigins = [
+    'https://surestplug.great-site.net',
+    'https://www.surestplug.great-site.net',
+    'https://surest-plug.ai.studio'
+  ];
+
+  const origin = req.headers.origin;
+
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
+
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(204);
+    return;
+  }
+
+  next();
+});
+
 app.use(express.json());
 
 // Auth Middleware helpers

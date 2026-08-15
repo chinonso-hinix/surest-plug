@@ -1,4 +1,9 @@
+import dns from 'node:dns';
+
+dns.setDefaultResultOrder('ipv4first');
+import https from 'https';
 import { initializeApp, getApps, getApp } from 'firebase-admin/app';
+import https from 'https';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import firebaseConfig from '../../firebase-applet-config.json' assert { type: 'json' };
@@ -22,9 +27,17 @@ import {
   SiteSettings
 } from '../types.js';
 
-const firebaseApp = !getApps().length ? initializeApp({
-  projectId: firebaseConfig.projectId
-}) : getApp();
+const firebaseHttpAgent = new https.Agent({
+  family: 4,
+  keepAlive: true
+});
+
+const firebaseApp = !getApps().length
+  ? initializeApp({
+      projectId: firebaseConfig.projectId,
+      httpAgent: firebaseHttpAgent
+    })
+  : getApp();
 
 export const adminAuth = getAuth(firebaseApp);
 export const adminDb = firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== '(default)'

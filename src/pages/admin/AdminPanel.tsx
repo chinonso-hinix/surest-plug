@@ -2,6 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { api } from '../../api/client';
+import {
+  getAdminUsers,
+  getAdminWebsites,
+  getAdminOrders,
+  getAdminDeposits,
+  getAdminTransactions,
+  getAdminCategories,
+  getAdminTickets,
+  getAdminBroadcasts,
+  calculateAdminStats
+} from '../../api/adminFirestore';
 import { LoadingGear } from '../../components/common/LoadingGear';
 import {
   User,
@@ -182,31 +193,52 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ initialTab = 'dashboard'
   const fetchAdminData = async () => {
     setLoading(true);
     setFetchError(null);
+
     try {
-      const [st, us, wb, od, dp, tx, ct, tk, bc] = await Promise.all([
-        api.getAdminStats(),
-        api.getAdminUsers(),
-        api.getAdminWebsites(),
-        api.getAdminOrders(),
-        api.getAdminDeposits(),
-        api.getAdminTransactions(),
-        api.getCategories(),
-        api.getAdminTickets(),
-        api.getAdminBroadcasts()
+      const [
+        users,
+        websites,
+        orders,
+        deposits,
+        transactions,
+        categories,
+        tickets,
+        broadcasts
+      ] = await Promise.all([
+        getAdminUsers(),
+        getAdminWebsites(),
+        getAdminOrders(),
+        getAdminDeposits(),
+        getAdminTransactions(),
+        getAdminCategories(),
+        getAdminTickets(),
+        getAdminBroadcasts()
       ]);
 
-      setStats(st.stats);
-      setAdminUsers(us.users || []);
-      setAdminWebsites(wb.websites || []);
-      setAdminOrders(od.orders || []);
-      setAdminDeposits(dp.deposits || []);
-      setAdminTransactions(tx.transactions || []);
-      setAdminCategories(ct.categories || []);
-      setAdminTickets(tk.tickets || []);
-      setAdminBroadcasts(bc.broadcasts || []);
+      const calculatedStats = calculateAdminStats(
+        users,
+        websites,
+        orders,
+        deposits,
+        tickets
+      );
+
+      setStats(calculatedStats);
+      setAdminUsers(users);
+      setAdminWebsites(websites);
+      setAdminOrders(orders);
+      setAdminDeposits(deposits);
+      setAdminTransactions(transactions);
+      setAdminCategories(categories);
+      setAdminTickets(tickets);
+      setAdminBroadcasts(broadcasts);
     } catch (err: any) {
-      console.error('Error fetching admin data:', err);
-      setFetchError(err.message || 'Failed to load admin panel data. Please check connection and try again.');
+      console.error('Error fetching admin data directly from Firebase:', err);
+
+      setFetchError(
+        err?.message ||
+        'Failed to load admin panel data from Firebase.'
+      );
     } finally {
       setLoading(false);
     }
@@ -1988,8 +2020,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ initialTab = 'dashboard'
 
       {/* 2. Website Add/Edit Modal */}
       {webModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white p-6 rounded-2xl max-w-xl w-full my-8 space-y-4 shadow-xl border border-slate-200">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs">
+          <div className="min-h-full flex items-start justify-center p-4">
+            <div className="bg-white p-6 rounded-2xl max-w-xl w-full my-4 space-y-4 shadow-xl border border-slate-200 max-h-[calc(100vh-2rem)] overflow-y-auto">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="font-bold text-slate-900 text-base">
                 {editingWeb ? 'Edit Website Listing' : 'Add New Website Listing'}
@@ -2235,7 +2268,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ initialTab = 'dashboard'
             </form>
           </div>
         </div>
-      )}
+     </div>
+    )}
 
       {/* 3. Password Reset Modal */}
       {resetPassModalUser && (
@@ -2329,14 +2363,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ initialTab = 'dashboard'
                   value={refundNote}
                   onChange={(e) => setRefundNote(e.target.value)}
                   placeholder="e.g. Order cancelled upon customer request"
-                  className="w-full p-2.5 rounded-xl border border-slate-300 font-medium"
+        
+          className="w-full p-2.5 rounded-xl border border-slate-300 font-medium"
                 />
               </div>
 
               <div className="flex gap-2 pt-2">
                 <button
-                  type="button"
-                  onClick={() => setRefundModalOrder(null)}
+                  type="button"                  onClick={() => setRefundModalOrder(null)}
                   className="flex-1 py-2.5 border border-slate-300 rounded-xl font-bold"
                 >
                   Cancel
